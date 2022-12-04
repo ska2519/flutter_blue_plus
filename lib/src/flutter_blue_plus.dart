@@ -126,6 +126,7 @@ class FlutterBluePlus {
   /// timeout calls stopStream after a specified [Duration].
   /// You can also get a list of ongoing results in the [scanResults] stream.
   /// If scanning is already in progress, this will throw an [Exception].
+  /// [fastScan] parameter to allow scan bluetooth each time
   Stream<ScanResult> scan({
     ScanMode scanMode = ScanMode.lowLatency,
     List<Guid> withServices = const [],
@@ -133,6 +134,7 @@ class FlutterBluePlus {
     List<String> macAddresses = const [],
     Duration? timeout,
     bool allowDuplicates = false,
+    bool fastScan = false,
   }) async* {
     var settings = protos.ScanSettings.create()
       ..androidScanMode = scanMode.value
@@ -175,6 +177,9 @@ class FlutterBluePlus {
         .map((buffer) => protos.ScanResult.fromBuffer(buffer))
         .map((p) {
       final result = ScanResult.fromProto(p);
+      if (fastScan) {
+        return result;
+      }
       final list = _scanResults.value;
       int index = list.indexOf(result);
       if (index != -1) {
